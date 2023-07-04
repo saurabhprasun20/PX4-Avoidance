@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   mavros_msgs
   mavlink
 )
+find_package(QtWebKit 5.15.2 REQUIRED)
 find_package(PCL 1.7 REQUIRED)
 
 if(DISABLE_SIMULATION)
@@ -48,6 +49,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
   ${YAML_CPP_INCLUDE_DIR}
+  ${Qt5WebKit_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -69,6 +71,7 @@ add_dependencies(avoidance ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED
 ## Specify libraries to link a library or executable target against
 target_link_libraries(avoidance
   ${catkin_LIBRARIES}
+  ${Qt5WebKit_LIBRARIES}
   ${YAML_CPP_LIBRARIES})
 
 #############

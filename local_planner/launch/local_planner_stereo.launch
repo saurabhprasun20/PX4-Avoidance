@@ -4,6 +4,32 @@
   <arg name="world_path" default="$(find avoidance)/sim/worlds/$(arg world_file_name).world" />
   <arg name="pointcloud_topics" default="[/stereo/points2]"/>
 
+
+  <arg name="obst" default = "false"/>
+  <arg name="obst_x" default = "0"/>
+  <arg name="obst_y" default = "0"/>
+  <arg name="obst_z" default = "0"/>
+  <arg name="obst_yaw" default = "0"/>
+  <arg name="obst_l" default = "1"/>
+  <arg name="obst_w" default = "1"/>
+  <arg name="obst_h" default = "1"/>
+
+
+  <arg name="obst2" default = "false"/>
+  <arg name="obst2_x" default = "0"/>
+  <arg name="obst2_y" default = "0"/>
+  <arg name="obst2_z" default = "0"/>
+  <arg name="obst2_yaw" default = "0"/>
+  <arg name="obst2_l" default = "1"/>
+  <arg name="obst2_w" default = "1"/>
+  <arg name="obst2_h" default = "1"/>
+
+  <arg name="pattern" default="false"/>
+  <arg name="pattern_design" default=""/>
+
+  <arg name="pattern2" default="false"/>
+  <arg name="pattern_design2" default=""/>
+
   <!-- Launch PX4 and mavros -->
   <include file="$(find avoidance)/launch/avoidance_sitl_stereo.launch" >
     <arg name="model" value="iris_stereo_camera" />
@@ -25,6 +51,24 @@
   </node>
 
   <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find local_planner)/resource/local_planner.rviz" />
+
+  <!-- add obstacles -->
+  <group if="$(arg obst)">
+    <!-- Convert xacro and put on parameter server -->
+    <param name="box_description" command="$(find xacro)/xacro.py /home/prasun/catkin_ws/src/avoidance/local_planner/launch/box.xacro name:=box l:=$(arg obst_l) w:=$(arg obst_w) h:=$(arg obst_h) pattern:=$(arg pattern_design)" />
+
+    <node name="spawn_obstacle" pkg="gazebo_ros" type="spawn_model" output="screen"
+          args="-param box_description -urdf -x $(arg obst_x) -y $(arg obst_y) -z $(arg obst_z) -Y $(arg obst_yaw) -model box/">
+    </node>
+
+  </group>
+  <group if="$(arg obst2)">
+    <param name="box_description2" command="$(find xacro)/xacro.py /home/prasun/catkin_ws/src/avoidance/local_planner/launch/box.xacro name:=box2 l:=$(arg obst2_l) w:=$(arg obst2_w) h:=$(arg obst2_h) pattern:=$(arg pattern_design2)" />
+
+    <node name="spawn_obstacle2" pkg="gazebo_ros" type="spawn_model" output="screen"
+          args="-param box_description2 -urdf -x $(arg obst2_x) -y $(arg obst2_y) -z $(arg obst2_z) -Y $(arg obst2_yaw) -model box2/">
+    </node>
+  </group>
 
   <!-- rosrun topic_tools transform /stereo/disparity /stereo/disparity_image sensor_msgs/Image 'm.image' -->
 

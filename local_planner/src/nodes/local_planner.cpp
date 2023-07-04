@@ -5,6 +5,11 @@
 #include "local_planner/tree_node.h"
 
 #include <sensor_msgs/image_encodings.h>
+#include <ros/console.h>
+#include "std_msgs/Float64.h"
+#include <fstream>
+#include <iostream>
+using namespace std;
 
 namespace avoidance {
 
@@ -100,17 +105,26 @@ void LocalPlanner::create2DObstacleRepresentation(const bool send_to_fcu) {
 }
 
 void LocalPlanner::generateHistogramImage(Histogram& histogram) {
+  // ros::Publisher distanceAndDepthPub = nh_.advertise<std_msgs::Float>("depth_val");
+
   histogram_image_data_.clear();
   histogram_image_data_.reserve(GRID_LENGTH_E * GRID_LENGTH_Z);
-
+  ofstream o;
+  o.open("/data/text.txt", std::ios_base::app);
+  o<<"New frame " << endl;
   // fill image data
   for (int e = GRID_LENGTH_E - 1; e >= 0; e--) {
     for (int z = 0; z < GRID_LENGTH_Z; z++) {
-      float dist = histogram.get_dist(e, z);
-      float depth_val = dist > 0.01f ? 255.f - 255.f * dist / max_sensor_range_ : 0.f;
+      float dist = histogram.get_dist(e, z); //distance to the vehicle of obstacle mapped to (x, y) cell
+      float depth_val = dist > 0.01f ? 255.f - 255.f * dist / max_sensor_range_ : 0.f; //assigning pixel in between 0 to 255. If no obstacle, make it 0 i.e. 
+      // black. It means that if the object is nearer the depth value is more and thus the pixel assigned will be of lighter color i.e. with increasing value. 
+      o << "e is" << e << "and z is " << z <<endl;
+      o << "Distance calculated is "<< dist <<endl;
+      o << "Depth calculated is " << depth_val <<endl;
       histogram_image_data_.push_back((int)std::max(0.0f, std::min(255.f, depth_val)));
     }
   }
+  o.close();
 }
 
 void LocalPlanner::determineStrategy() {
